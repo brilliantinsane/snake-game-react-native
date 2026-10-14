@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React from "react";
 import { PauseIcon, PlayIcon, Refresh01Icon } from "@hugeicons/core-free-icons";
-import { Colors } from "../styles/colors";
+import { Colors } from "@/constants/globals";
 import AnimatedButton from "./AnimatedButton";
 import Animated, {
   SharedValue,

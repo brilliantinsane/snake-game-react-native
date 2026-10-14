@@ -1,31 +1,34 @@
-import {
-  Dimensions,
-  LayoutChangeEvent,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import { LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Colors } from "../styles/colors";
+import {
+  globalStyles,
+  Colors,
+  FOOD_INITIAL_POSITION,
+  INITIAL_MOVE_INTERVAL,
+  INITIAL_SNAKE_CELL_SIZE,
+  MIN_MOVE_INTERVAL,
+  OPPOSITE_DIRECTION,
+  SCORE_INCREMENT,
+  SNAKE_INITIAL_POSITION,
+  SPEED_INCREMENT,
+  FRUIT_EMOJIS,
+  GAME_OVER_EMOJIS,
+} from "@/constants/globals";
 import {
   Directions,
   Gesture,
   GestureDetector,
 } from "react-native-gesture-handler";
-import { Coordinate } from "../types/types";
+import { Coordinate, GameBounds } from "@/types/types";
 import Snake from "./Snake";
-import { checkGameOver } from "../utils/checkGameOver";
+import { checkGameOver } from "@/utils/checkGameOver";
+import { checkEatsFood } from "@/utils/checkEatsFood";
+import { randomFoodPos } from "@/utils/randomFoodPos";
 import Loading from "./Loading";
 import Food from "./Food";
-import { checkEatsFood } from "../utils/checkEatsFood";
-import { randomFoodPos } from "../utils/randomFoodPos";
 import Header from "./Header";
 import { scheduleOnRN } from "react-native-worklets";
-import { fruitEmojis } from "../constants/globals";
 import Animated, {
   BounceIn,
   useSharedValue,
@@ -34,38 +37,31 @@ import Animated, {
 } from "react-native-reanimated";
 import AnimatedButton from "./AnimatedButton";
 
-const INITIAL_SNAKE_CELL_SIZE = 15;
-const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
-const FOOD_INITIAL_POSITION = { x: 5, y: 20 };
-const INITIAL_MOVE_INTERVAL = 150;
-const MIN_MOVE_INTERVAL = 60;
-const SPEED_INCREMENT = 5;
-const SCORE_INCREMENT = 10;
-const OPPOSITE_DIRECTION: Partial<Record<Directions, Directions>> = {
-  [Directions.RIGHT]: Directions.LEFT,
-  [Directions.LEFT]: Directions.RIGHT,
-  [Directions.UP]: Directions.DOWN,
-  [Directions.DOWN]: Directions.UP,
-};
-
 const Game = () => {
   const direction = useRef<Directions>(Directions.RIGHT);
   const lastMoveDirection = useRef<Directions>(Directions.RIGHT);
   const [snake, setSnake] = useState<Coordinate[]>(SNAKE_INITIAL_POSITION);
   const [food, setFood] = useState<Coordinate>(FOOD_INITIAL_POSITION);
-  const [isGameOver, setIsGameOver] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [gameBounds, setGameBounds] = useState({
+  const [isGameOver, setIsGameOver] = useState<boolean>(false);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [gameBounds, setGameBounds] = useState<GameBounds>({
     xMin: 0,
     xMax: 0,
     yMin: 0,
     yMax: 0,
   });
-  const [boardHeight, setBoardHeight] = useState(0);
-  const [snakeCellSize, setSnakeCellSize] = useState(INITIAL_SNAKE_CELL_SIZE);
+  const [boardHeight, setBoardHeight] = useState<number>(0);
+  const [snakeCellSize, setSnakeCellSize] = useState<number>(
+    INITIAL_SNAKE_CELL_SIZE,
+  );
   const [score, setScore] = useState<number>(0);
-  const fruitIndex = useRef(Math.floor(Math.random() * fruitEmojis.length));
-  const [isLoading, setIsLoading] = useState(true);
+  const [fruitIndex, setFruitIndex] = useState<number>(
+    Math.floor(Math.random() * FRUIT_EMOJIS.length),
+  );
+  const [gameOverIndex, setGameOverIndex] = useState<number>(
+    Math.floor(Math.random() * GAME_OVER_EMOJIS.length),
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const scoreScale = useSharedValue(1);
   const eatenFoodCount = snake.length - SNAKE_INITIAL_POSITION.length;
   const moveInterval = Math.max(
@@ -88,7 +84,9 @@ const Game = () => {
     direction.current = nextDirection;
   };
   const updateFruitIndex = () =>
-    (fruitIndex.current = Math.floor(Math.random() * fruitEmojis.length));
+    setFruitIndex(Math.floor(Math.random() * FRUIT_EMOJIS.length));
+  const updateGameOverIndex = () =>
+    setGameOverIndex(Math.floor(Math.random() * GAME_OVER_EMOJIS.length));
 
   const moveSnake = () => {
     const snakeHead = snake[0];
@@ -191,14 +189,16 @@ const Game = () => {
     setScore(0);
     direction.current = Directions.RIGHT;
     lastMoveDirection.current = Directions.RIGHT;
+    updateFruitIndex();
+    updateGameOverIndex();
     setIsPaused(false);
   };
 
   return (
     <Fragment>
       <GestureDetector gesture={panGesture}>
-        <SafeAreaView style={styles.container}>
-          <View style={{ flex: 1, gap: 30 }}>
+        <SafeAreaView style={[globalStyles.container, styles.screen]}>
+          <View style={[globalStyles.container, styles.gameContainer]}>
             <Header
               score={score}
               scoreScale={scoreScale}
@@ -206,21 +206,26 @@ const Game = () => {
               pauseGame={pauseGame}
               reloadGame={reloadGame}
             />
-            <View style={styles.boundaries} onLayout={measureBoard}>
+            <View
+              style={[globalStyles.container, styles.boundaries]}
+              onLayout={measureBoard}
+            >
               {isLoading ? (
                 <Loading />
               ) : (
                 <View
-                  style={{
-                    height: boardHeight,
-                    backgroundColor: Colors.background,
-                  }}
+                  style={[
+                    styles.board,
+                    {
+                      height: boardHeight,
+                    },
+                  ]}
                 >
                   <Snake snake={snake} cellSize={snakeCellSize} />
                   <Food
                     pos={{ x: food.x, y: food.y }}
                     cellSize={snakeCellSize}
-                    fruitIndex={fruitIndex.current}
+                    fruitIndex={fruitIndex}
                   />
                 </View>
               )}
@@ -235,15 +240,10 @@ const Game = () => {
             style={styles.gameOver}
           >
             <View style={styles.gameOverContent}>
-              <Text style={{ fontSize: 40 }}>😕</Text>
-              <Text
-                style={{
-                  fontSize: 24,
-                  fontWeight: 700,
-                }}
-              >
-                Game over!
+              <Text style={styles.gameOverEmoji}>
+                {GAME_OVER_EMOJIS[gameOverIndex]}
               </Text>
+              <Text style={styles.gameOverTitle}>Game over!</Text>
             </View>
             <AnimatedButton onPress={reloadGame} title="Play again" />
           </Animated.View>
@@ -256,15 +256,19 @@ const Game = () => {
 export default Game;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  screen: {
     backgroundColor: Colors.primary,
     paddingHorizontal: 15,
   },
+  gameContainer: {
+    gap: 30,
+  },
   boundaries: {
-    flex: 1,
     borderColor: Colors.primary,
     backgroundColor: Colors.primary,
+  },
+  board: {
+    backgroundColor: Colors.background,
   },
   cover: {
     position: "absolute",
@@ -283,5 +287,12 @@ const styles = StyleSheet.create({
   gameOverContent: {
     gap: 4,
     alignItems: "center",
+  },
+  gameOverEmoji: {
+    fontSize: 40,
+  },
+  gameOverTitle: {
+    fontSize: 24,
+    fontWeight: 700,
   },
 });

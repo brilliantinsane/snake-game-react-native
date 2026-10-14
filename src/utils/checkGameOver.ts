@@ -1,9 +1,9 @@
-import { Coordinate } from "../types/types";
+import { Coordinate, GameBounds } from "@/types/types";
 
 export const checkGameOver = (
   snake: Coordinate[],
   snakeHead: Coordinate,
-  boundaries: any,
+  boundaries: GameBounds,
 ): boolean => {
   const isOutOfBounds =
     snakeHead.x < boundaries.xMin ||

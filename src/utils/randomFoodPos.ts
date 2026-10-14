@@ -1,25 +1,28 @@
-import { Coordinate } from "../types/types";
+import { Coordinate, GameBounds } from "@/types/types";
 
-export const randomFoodPos = (maxX: number, maxY: number): Coordinate => {
-  let x = Math.floor(Math.random() * maxX);
-  let y = Math.floor(Math.random() * maxY);
+export const randomFoodPos = (
+  xMax: GameBounds["xMax"],
+  yMax: GameBounds["yMax"],
+): Coordinate => {
+  let x = Math.floor(Math.random() * xMax);
+  let y = Math.floor(Math.random() * yMax);
 
   if (x === 0 && y === 0) {
     x += 1;
     y += 1;
   }
 
-  if (x === maxX && y === 0) {
+  if (x === xMax && y === 0) {
     x -= 1;
     y += 1;
   }
 
-  if (x === 0 && y === maxY) {
+  if (x === 0 && y === yMax) {
     x += 1;
     y -= 1;
   }
 
-  if (x === maxX && y === maxY) {
+  if (x === xMax && y === yMax) {
     x -= 1;
     y -= 1;
   }

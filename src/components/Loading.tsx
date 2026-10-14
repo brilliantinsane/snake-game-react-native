@@ -1,13 +1,12 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
-import { isIos } from "../constants/globals";
+import { isIos, Colors } from "@/constants/globals";
 import { FullWindowOverlay } from "react-native-screens";
-import { Colors } from "../styles/colors";
 
 const LoadingContent = () => {
   return (
     <View style={[StyleSheet.absoluteFill, styles.container]}>
-      <Text style={{ color: Colors.background, fontSize: 24 }}>Loading...</Text>
+      <Text style={styles.text}>Loading...</Text>
     </View>
   );
 };
@@ -29,5 +28,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     alignItems: "center",
     justifyContent: "center",
+  },
+  text: {
+    color: Colors.background,
+    fontSize: 24,
   },
 });

@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import React from "react";
-import { Coordinate } from "../types/types";
-import { fruitEmojis } from "../constants/globals";
+import { Coordinate } from "@/types/types";
+import { FRUIT_EMOJIS } from "@/constants/globals";
 
 type FoodProps = {
   pos: Coordinate;
@@ -19,7 +19,7 @@ const Food = ({ pos, cellSize, fruitIndex }: FoodProps) => (
       },
     ]}
   >
-    <Text>{fruitEmojis[fruitIndex]}</Text>
+    <Text>{FRUIT_EMOJIS[fruitIndex]}</Text>
   </Text>
 );
 

@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text } from "react-native";
 import React from "react";
 import Animated, {
   useAnimatedStyle,
@@ -7,7 +7,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { HugeiconsIcon, HugeiconsProps } from "@hugeicons/react-native";
-import { Colors } from "../styles/colors";
+import { Colors } from "@/constants/globals";
 
 type Variant = "primary" | "icon";
 

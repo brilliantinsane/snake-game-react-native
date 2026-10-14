@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import React, { Fragment } from "react";
-import { Coordinate } from "../types/types";
-import { Colors } from "../styles/colors";
+import { Coordinate } from "@/types/types";
+import { Colors } from "@/constants/globals";
 import Animated from "react-native-reanimated";
 
 type SnakeProps = {
